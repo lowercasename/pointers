@@ -346,72 +346,96 @@ auth.post('/register', (req, res) => {
     sequelize.models.User.findOne({ where: { emailAddress } })
         .then((user) => {
             // Check if the email address is already in use
+            // If it is, we still tell the user that the registration was successful
+            // to prevent account enumeration attacks
             if (user) {
-                req.flash(
-                    'error',
-                    'This email address is already in use. Try logging in.',
-                );
-                return res.redirect('/register');
-            }
-            const salt = bcrypt.genSaltSync(10);
-            const hashedPassword = bcrypt.hashSync(password, salt);
-            const validationToken = crypto.randomBytes(16).toString('hex');
-            sequelize.models.User.create({
-                emailAddress,
-                password: hashedPassword,
-                salt,
-                validationToken,
-            })
-                .then((user) => {
-                    // Create a new UserName for each name
-                    splitNames.forEach(async (name, index) => {
-                        await sequelize.models.UserName.create({
-                            name: name.trim(),
-                            public: true,
-                            main: index === 0,
-                            UserId: user.id,
-                        }).catch((err) => {
-                            console.log(err);
+                // Send an 'account exists' email
+                mailgun.messages().send(
+                    {
+                        from: 'noreply@pointers.website',
+                        to: emailAddress,
+                        subject: 'Your Pointers account',
+                        text: `You just tried to create an account on Pointers, but an account already exists with the email address ${emailAddress}. If you need to reset your password, please visit https://pointers.website/forgot-password.`,
+                    },
+                    (error) => {
+                        if (error) {
+                            console.log(error);
                             req.flash(
                                 'error',
-                                'There was an error creating your account. Please try again.',
+                                'There was an error sending the validation email. Please try again.',
                             );
                             return res.redirect('/register');
-                        });
-                    });
-                    mailgun.messages().send(
-                        {
-                            from: 'noreply@pointers.website',
-                            to: emailAddress,
-                            subject: 'Please validate your email address',
-                            text: `Please click the following link to validate your email address: https://pointers.website/validate/${validationToken}`,
-                        },
-                        (error) => {
-                            if (error) {
-                                console.log(error);
+                        } else {
+                            req.flash(
+                                'success',
+                                'Account created. Please click the link in the email we sent you to validate your account.',
+                            );
+                            return res.redirect('/login');
+                        }
+                    },
+                );
+            } else {
+                // From here, we're creating a new account
+                const salt = bcrypt.genSaltSync(10);
+                const hashedPassword = bcrypt.hashSync(password, salt);
+                const validationToken = crypto.randomBytes(16).toString('hex');
+                sequelize.models.User.create({
+                    emailAddress,
+                    password: hashedPassword,
+                    salt,
+                    validationToken,
+                })
+                    .then((user) => {
+                        // Create a new UserName for each name
+                        splitNames.forEach(async (name, index) => {
+                            await sequelize.models.UserName.create({
+                                name: name.trim(),
+                                public: true,
+                                main: index === 0,
+                                UserId: user.id,
+                            }).catch((err) => {
+                                console.log(err);
                                 req.flash(
                                     'error',
-                                    'There was an error sending the validation email. Please try again.',
+                                    'There was an error creating your account. Please try again.',
                                 );
                                 return res.redirect('/register');
-                            } else {
-                                req.flash(
-                                    'success',
-                                    'Account created. Please click the link in the email we sent you to validate your account.',
-                                );
-                                return res.redirect('/login');
-                            }
-                        },
-                    );
-                })
-                .catch((err) => {
-                    console.log(err);
-                    req.flash(
-                        'error',
-                        'There was an error creating your account. Please try again.',
-                    );
-                    return res.redirect('/register');
-                });
+                            });
+                        });
+                        mailgun.messages().send(
+                            {
+                                from: 'noreply@pointers.website',
+                                to: emailAddress,
+                                subject: 'Please validate your email address',
+                                text: `Please click the following link to validate your email address: https://pointers.website/validate/${validationToken}`,
+                            },
+                            (error) => {
+                                if (error) {
+                                    console.log(error);
+                                    req.flash(
+                                        'error',
+                                        'There was an error sending the validation email. Please try again.',
+                                    );
+                                    return res.redirect('/register');
+                                } else {
+                                    req.flash(
+                                        'success',
+                                        'Account created. Please click the link in the email we sent you to validate your account.',
+                                    );
+                                    return res.redirect('/login');
+                                }
+                            },
+                        );
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        req.flash(
+                            'error',
+                            'There was an error creating your account. Please try again.',
+                        );
+                        return res.redirect('/register');
+                    });
+            }
         })
         .catch((err) => {
             console.log(err);
@@ -432,6 +456,8 @@ auth.post('/forgot-password', (req, res) => {
     sequelize.models.User.findOne({ where: { emailAddress } })
         .then((user) => {
             if (!user) {
+                // If the user doesn't exist, we still tell the user that the email was sent
+                // to prevent account enumeration attacks
                 req.flash(
                     'success',
                     'Please click the link in the email we sent you to reset your password.',
@@ -490,25 +516,25 @@ auth.post('/reset-password', (req, res) => {
     const { password, resetToken } = req.body;
     if (!password || !resetToken) {
         req.flash('error', 'Please provide a password.');
-        return res.redirect('/reset-password');
+        return res.redirect(`/reset-password/${resetToken}`);
     }
     if (password.length < 8) {
         req.flash('error', 'Password must be at least 8 characters long.');
-        return res.redirect('/reset-password');
+        return res.redirect(`/reset-password/${resetToken}`);
     }
     if (password.length > 72) {
         req.flash('error', 'Password must be less than 72 characters long.');
-        return res.redirect('/reset-password');
+        return res.redirect(`/reset-password/${resetToken}`);
     }
     sequelize.models.User.findOne({ where: { resetToken } })
         .then((user) => {
             if (!user) {
-                req.flash('error', 'Invalid password reset token.');
-                return res.redirect('/reset-password');
+                req.flash('error', 'Invalid password reset token. Please reset your password again by visiting <a href="/forgot-password">this page</a>.');
+                return res.redirect(`/reset-password/${resetToken}`);
             }
             if (user.resetTokenExpiry < Date.now()) {
-                req.flash('error', 'Password reset token has expired.');
-                return res.redirect('/reset-password');
+                req.flash('error', 'Password reset token has expired. Please reset your password again by visiting <a href="/forgot-password">this page</a>.');
+                return res.redirect(`/reset-password/${resetToken}`);
             }
             const salt = bcrypt.genSaltSync(10);
             const hashedPassword = bcrypt.hashSync(password, salt);
@@ -527,7 +553,7 @@ auth.post('/reset-password', (req, res) => {
                         'error',
                         'There was an error resetting your password. Please try again.',
                     );
-                    return res.redirect('/reset-password');
+                    return res.redirect(`/reset-password/${resetToken}`);
                 });
         })
         .catch((err) => {
@@ -536,7 +562,7 @@ auth.post('/reset-password', (req, res) => {
                 'error',
                 'There was an error resetting your password. Please try again.',
             );
-            return res.redirect('/reset-password');
+            return res.redirect(`/reset-password/${resetToken}`);
         });
 });
 
@@ -586,6 +612,8 @@ auth.post('/resend-validation', async (req, res) => {
                         return res.redirect('/resend-validation');
                     });
             } else {
+                // If the user doesn't exist, we still tell the user that the email was sent
+                // to prevent account enumeration attacks
                 req.flash(
                     'success',
                     'Please click the link in the email we sent you to validate your account.',
