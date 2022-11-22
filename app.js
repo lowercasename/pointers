@@ -48,4 +48,8 @@ app.use('/', frontend);
 app.use('/api', api);
 app.use('/auth', auth);
 
+app.use((_, res) => {
+    res.status(404).render('404');
+})
+
 export default app;
