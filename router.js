@@ -19,8 +19,9 @@ const api = express.Router();
 const frontend = express.Router();
 const auth = express.Router();
 
-frontend.get('/', (req, res) => {
-    res.render('index');
+frontend.get('/', async (req, res) => {
+    const totalUsers = await sequelize.models.User.count();
+    res.render('index', { totalUsers });
 });
 
 frontend.get('/login', (req, res) => {
