@@ -1,0 +1,101 @@
+<% layout('./layout') %>
+
+<nav>
+    <h2>
+        Your profile
+    </h2>
+    <a href="/profile/edit">Edit profile</a>
+</nav>
+<main>
+    <%~ includeFile('./partials/flash.eta', it) %>
+    <h3>Share your user page with others</h3>
+    <p>
+        Copy this link: <a href="https://pointers.website/u/<%= it.user?.hash %>">https://pointers.website/u/<%= it.user?.hash %></a>
+    <hr>
+    <h3>Your names</h3>
+    <p class="explainer">These are the names by which others can find you. They are all publicly searchable.</p>
+    <% it.user?.names.forEach((name) => {%>
+        <div class="name item">
+            <header>
+                <div><%= name.name %></div>
+                <div><a href="/api/name/<%= name.hash %>/delete">Delete</a><% if (!name.main) { %> | <a href="/api/name/<%= name.hash %>/set-default">Set as default</a><% } %></div>
+            </header>
+        </div>
+    <% }) %>
+    <form action="/api/name" method="post" class="inline-form">
+        <input type="text" name="name" placeholder="Name" />
+        <input type="submit" value="Add name" />
+    </form>
+    <hr />
+    <h3>Your bio</h3>
+    <p class="explainer">Some information about you. This is publicly visible.</p>
+    <% if (it.user?.bio) { %>
+        <%= it.user.bio %>
+    <% } else { %>
+        <p>You haven't written a bio yet.</p>
+    <% } %>
+    <hr>
+    <h3>Your pointers</h3>
+    <p class="explainer">These are the links to your online presence which you can share with your friends.</p>
+    <% it.pointers?.forEach((pointer) => {%>
+        <%~ includeFile('./partials/pointer-editable.eta', pointer) %>
+    <% }) %>
+    <form action="/api/pointer" method="post" class="inline-form">
+        <h4>Add a pointer</h4>
+        <label for="title">Title</label>
+        <input type="text" name="title" id="title" />
+        <label for="url">URL</label>
+        <input type="text" name="url" id="url" />
+        <label for="description">Description (optional)</label>
+        <textarea name="description" id="description"></textarea>
+        <input type="submit" value="Add pointer" />
+    </form>
+    <hr>
+    <h3>Accepted access requests</h3>
+    <p class="explainer">These are all the people to whom you have previously granted access to your pointers.</p>
+    <% it.accessRequestsAsRequestee?.filter((accessRequest) => accessRequest.accepted === 1).forEach((accessRequest) => {%>
+        <div class="access-request item">
+            <header>
+                <div>
+                    <a href="/u/<%= accessRequest.requester?.hash %>"><%= accessRequest.requester?.UserNames?.name %></a>
+                </div>
+                <div>
+                    <a href="/api/access-request/<%= accessRequest.hash %>/delete">Revoke</a>
+                </div>
+            </header>
+            <% if (accessRequest.expiry > new Date() ) { %>
+                <p class="description">Expires <%= accessRequest.expiry.toLocaleString() %></p>
+            <% } else { %>
+                <p class="description">This access request has expired. The user will have to request access again to see your pointers.</p>
+            <% } %>
+        </div>
+    <% }) %>
+    <hr>
+    <h3>Pending access requests</h3>
+    <p class="explainer">These are all the people who have requested access to your pointers.</p>
+    <% it.accessRequestsAsRequestee?.filter((accessRequest) => accessRequest.pending === 1).forEach((accessRequest) => {%>
+        <div class="access-request item">
+            <header>
+                <div>
+                    <a href="/u/<%= accessRequest.requester?.hash %>"><%= accessRequest.requester?.UserNames?.name %></a>
+                </div>
+                <div>
+                    <a href="/api/access-request/<%= accessRequest.hash %>/accept">Accept</a> | <a href="/api/access-request/<%= accessRequest.hash %>/delete">Delete</a>
+                </div>
+            </header>
+        </div>
+    <% }) %>
+    <hr>
+    <h3>Your access requests</h3>
+    <p class="explainer">These are all the people whose pointers you have requested access to.</p>
+    <% it.accessRequestsAsRequester?.forEach((accessRequest) => {%>
+        <div class="access-request item">
+            <header>
+                <div>
+                    <a href="/u/<%= accessRequest.requestee?.hash %>"><%= accessRequest.requestee?.UserNames?.name %></a>
+                </div>
+                <span class="badge"><% if (accessRequest.accepted === 1) { %>accepted<% } else if (accessRequest.pending === 1) { %>pending<% } else { %>rejected<% } %></span>
+            </header>
+        </div>
+    <% }) %>
+</main>

@@ -1,0 +1,13 @@
+<div class="pointer item">
+    <header>
+        <div>
+            <strong><%= it.title %> - <a href="<%= it.url %>"><%= it.url %></a></strong>
+        </div>
+        <div>
+            <a href="/pointer/<%= it.hash %>/edit">Edit</a> | <a href="/api/pointer/<%= it.hash %>/delete">Delete</a>
+        </div>
+    </header>
+    <% if (it.description) { %>
+        <p class="description"><%= it.description %></p>
+    <% } %>
+</div>

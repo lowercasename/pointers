@@ -1,0 +1,27 @@
+<% layout('./layout') %>
+
+<h2>Edit profile</h2>
+<%~ includeFile('./partials/flash.eta', it) %>
+<form action="/api/profile" method="post" class="inline-form">
+    <label for="emailAddress">Email address</label>
+    <input id="emailAddress" name="emailAddress" type="email" autocomplete="emailAddress" required value="<%= it.user?.emailAddress %>" />
+    <small>If you change your email address, you will be logged out and sent an email to revalidate it.</small><br><br>
+    <label for="bio">Write something about yourself. This will be publicly visible to anyone searching for one of your names.</label>
+    <textarea id="bio" name="bio"><%= it.user?.bio || "" %></textarea>
+    <label for="pointerAccessDuration">How long should other users be able to view your pointers after you have accepted their request?</label>
+    <select id="pointerAccessDuration" name="pointerAccessDuration">
+        <option value="1" <%= it.user?.pointerAccessDuration == 1 ? "selected" : "" %>>1 day</option>
+        <option value="7" <%= it.user?.pointerAccessDuration == 7 ? "selected" : "" %>>1 week</option>
+        <option value="30" <%= it.user?.pointerAccessDuration == 30 ? "selected" : "" %>>1 month</option>
+    </select>
+    <button type="submit">Edit profile</button>
+    </div>
+</form>
+<hr>
+<h2>Delete account</h2>
+<form action="/api/profile/delete" method="post" >
+    <div>
+        <p>Your account will be deleted immediately!</p>
+        <button type="submit">Delete account</button>
+    </div>
+</form>

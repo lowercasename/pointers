@@ -1,0 +1,10 @@
+<% layout('./layout') %>
+
+<h2>Resend validation email</h2>
+<%~ includeFile('./partials/flash.eta', it) %>
+<p>Enter your email address to have your account validation token resent.</p>
+<form action="/auth/resend-validation" method="post" class="inline-form">
+    <label for="emailAddress">Email address</label>
+    <input id="emailAddress" name="emailAddress" type="email" autocomplete="emailAddress" required />
+    <button type="submit">Resend validation token</button>
+</form>

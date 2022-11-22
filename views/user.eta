@@ -1,0 +1,22 @@
+<% layout('./layout') %>
+
+<h2><%= it.user?.UserNames?.map((name) => name.name).join(' / ') %></h2>
+<% if (it.user?.bio) { %><p class="description"><%= it.user.bio %></p><% } %>
+
+<% if (it.access.accepted && it.access.active) { %>
+    <% if (it.user.Pointers?.length) { %>
+        <% it.user.Pointers?.forEach((pointer) => { %>
+            <%~ includeFile('./partials/pointer.eta', pointer) %>
+        <% }) %>
+    <% } else { %>
+        <p>This user hasn't added any pointers.</p>
+    <% } %>
+<% } else if (it.access.pending) { %>
+    <p>You have requested access to this user's pointers.</p>
+<% } else { %>
+    <%~ includeFile('./partials/flash.eta', it) %>
+    <form action="/api/access-request/<%= it.user?.hash %>" method="post" class="inline-form">
+        <textarea name="message" placeholder="Let them know who you are and where they know you from!"></textarea>
+        <input type="submit" value="Request access to this user's pointers">
+    </form>
+<% } %>

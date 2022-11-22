@@ -1,0 +1,13 @@
+<% layout('./layout') %>
+
+<h2>Register</h2>
+<%~ includeFile('./partials/flash.eta', it) %>
+<form action="/auth/register" method="post" class="inline-form">
+    <label for="emailAddress">Email address</label>
+    <input id="emailAddress" name="emailAddress" type="email" autocomplete="emailAddress" required />
+    <label for="password">Password</label>
+    <input id="password" name="password" type="password" autocomplete="password" required />
+    <label for="names">Enter the names by which you would like people to be able to find you on pointers. You may add multiple names, separated by commas.</label>
+    <textarea id="names" name="names" required></textarea>
+    <button type="submit">Register</button>
+</form>

@@ -1,0 +1,5 @@
+<% layout('./layout') %>
+
+<h2>404</h2>
+
+<p>This page wasn't found. Please check the URL and try again.</p>

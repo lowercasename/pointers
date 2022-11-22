@@ -1,0 +1,6 @@
+<div class="pointer item">
+    <a href="<%= it.url %>" target="_blank" rel="nofollow"><%= it.title %></a>
+    <% if (it.description) { %>
+        <p class="description"><%= it.description %></p>
+    <% } %>
+</div>

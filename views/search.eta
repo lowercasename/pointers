@@ -1,0 +1,22 @@
+<% layout('./layout') %>
+
+<h2>Search</h2>
+<form action="/search" method="get" class="inline-form form--collapse">
+    <input type="text" name="q" placeholder="Search for a name" value="<%= it.q || "" %>"/>
+    <input type="submit" value="Search" />
+</form>
+<% if (it.error) { %>
+    <div class="message message--error"><%= it.error %></div>
+<% } else if (it.users) { %>
+    <h2>Results</h2>
+    <% if (it.users.length > 0) { %>
+        <% it.users.forEach((user) => { %>
+            <div class="user item">
+                <a href="/u/<%= user.hash %>"><%= user.names[0].name %></a>
+                <% if (user.bio) { %><p class="description"><%= user.bio %></p><% } %>
+            </div>
+        <% }) %>
+    <% } else { %>
+        <div class="message message--info">No results found.</div>
+    <% } %>
+<% } %>

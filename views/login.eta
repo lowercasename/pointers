@@ -1,0 +1,12 @@
+<% layout('./layout') %>
+
+<h2>Login</h2>
+<%~ includeFile('./partials/flash.eta', it) %>
+<form action="/auth/login" method="post" class="inline-form">
+    <label for="emailAddress">Email address</label>
+    <input id="emailAddress" name="emailAddress" type="email" autocomplete="emailAddress" required />
+    <label for="password">Password</label>
+    <input id="password" name="password" type="password" autocomplete="password" required />
+    <button type="submit">Login</button>
+    <a href="/forgot-password">Forgot password?</a>
+</form>

@@ -1,0 +1,26 @@
+<!doctype html5>
+<html>
+    <head>
+        <title>Pointers</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="/css/style.css" />
+    </head>
+    <body>
+        <header id="header">
+            <div id="logo">
+                <img src="/images/arrow.png" alt="logo" />
+                <h1><a href="/">Pointers</a></h1>
+            </div>
+            <nav id="main-nav">
+                <%~ includeFile('./partials/navigation.eta', it) %>
+            </nav>
+        </header>
+        <main id="content">
+            <%~ it.body %>
+        </main>
+        <footer id="footer">
+            Made with ❤️ by <a href="https://raphael.computer" target="_blank">Raphael</a>. View on <a href="https://github.com/lowercasename/pointers" target="_blank">GitHub</a>.
+        </footer>
+    </body>
+</html>

@@ -1,0 +1,15 @@
+<% layout('./layout') %>
+
+<h2>Edit pointer</h2>
+<form action="/api/pointer" method="post" class="inline-form">
+    <%~ includeFile('./partials/flash.eta', it) %>
+    <label for="title">Title</label>
+    <input type="text" name="title" id="title" value="<%= it.pointer?.title %>" />
+    <label for="url">URL</label>
+    <input type="text" name="url" id="url" value="<%= it.pointer?.url %>"/>
+    <label for="description">Description (optional)</label>
+    <textarea name="description" id="description"><%= it.pointer?.description %></textarea>
+    <input type="hidden" name="hash" value="<%= it.pointer?.hash %>"/>
+    <input type="hidden" name="_method" value="put" />
+    <input type="submit" value="Edit pointer" />
+</form>

@@ -1,0 +1,42 @@
+<% layout('./layout') %>
+
+<p>
+    <strong>Pointers</strong> is a directory to help share links to your online presence with friends and mutuals.
+    It is designed for private or intimate links you may not want to make visible to the world - a sort of forwarding
+    service for the Internet, inspired by the concept of the <a href="https://en.wikipedia.org/wiki/Cheney%27s_algorithm">forwarding pointer</a> in computer science.
+</p>
+<p>
+    It was built as a response to the seeming fragility of online spaces we began to witness in November 2022.
+    <strong>Pointers</strong> is purposefully very low-tech and simple, which will hopefully help support its longevity.
+</p>
+<p>
+    <strong>Pointers</strong> is similar to other 'link in bio' or 'landing page' services, with the following differences:
+    <ul>
+        <li>Your links are private by default and are only visible to people you approve.</li>
+        <li>It is completely free for ever and open source.</li>
+        <li>It has no analytics or tracking.</li>
+        <li>It is a sort of pink color, which is nice.</li>
+    </ul>
+</p>
+<h2>How Pointers works</h2>
+<ol>
+    <li>Sign up for an account.</li>
+    <li>Add the names by which you go online (publicly visible) and your links (private).</li>
+    <li>Your friends can search for you by name and request to see your links.</li>
+    <li>If you approve a request, your links will be visible to that user for a short period of time (1 day to a month).</li>
+    <li>Your friends can always request to see your links again later.</li>
+</ol>
+<h2>FAQ</h2>
+<h3>Where is the data stored? What is your privacy policy?</h3>
+<p>The data is stored on a server <a href="https://raphael.computer">Raphael</a> runs. He promises that he won't look at your private data. If you want to use <strong>Pointers</strong>, you are just going to have to trust him on this.</p>
+<p>The data will never be sold or shared with third parties. If you delete your account, your data is truly gone.</p>
+<h3>What is your code of conduct?</h3>
+<p><strong>Pointers</strong> is designed to share links, nothing more. If you use it for spam or to harass or dox others, your account will be deleted.</p>
+<p>We are not responsible for the content of the links you share. If you share a link that is illegal or harmful, you are responsible for it, and if you are reported, your account will be deleted.</p>
+<p>If you see any content on <strong>Pointers</strong> that troubles you, please let Raphael know and he will deal with it!</p>
+<h3>How do I get in touch with you?</h3>
+<p>You can email Raphael at <a href="mailto:contact@pointers.website">contact@pointers.website</a>.
+<h3>Would you consider making Pointers federated?</h3>
+<p>Maybe.</p>
+<h3>I don't like the pink color.</h3>
+<p>Consider <a href="https://www.tampermonkey.net/">userscripts</a>.
