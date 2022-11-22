@@ -19,6 +19,7 @@ const sessionStore = new SequelizeStore({
     db: sequelize,
     expiration: 1000 * 60 * 60 * 24 * 7,
 });
+// sessionStore.sync();
 app.use(
     session({
         name: 'session',
@@ -47,6 +48,4 @@ app.use('/', frontend);
 app.use('/api', api);
 app.use('/auth', auth);
 
-app.listen(3000, () => {
-    console.log('Server is running on port 3000');
-});
+export default app;
