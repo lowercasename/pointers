@@ -229,7 +229,7 @@ frontend.get('/search', redirectIfNotLoggedIn, async (req, res) => {
     res.render('search', { users, q });
 });
 
-frontend.get('/u/:hash', redirectIfNotLoggedIn, async (req, res) => {
+frontend.get('/u/:hash', async (req, res) => {
     const { hash } = req.params;
     const user = await sequelize.models.User.findAll({
         where: { hash },
@@ -248,12 +248,12 @@ frontend.get('/u/:hash', redirectIfNotLoggedIn, async (req, res) => {
     if (!user.length) {
         return res.render('404');
     }
-    if (user[0].id === res.locals.user?.id) {
+    if (res.locals.user?.id && user[0].id === res.locals.user?.id) {
         return res.redirect('/profile');
     }
     res.render('user', {
         user: user[0],
-        access: await getAccess(res.locals.user.id, user[0].id),
+        access: await getAccess(res.locals.user?.id, user[0].id),
     });
 });
 
