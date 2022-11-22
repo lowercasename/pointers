@@ -29,6 +29,8 @@
 <h2>FAQ</h2>
 <h3>How many people are using Pointers?</h3>
 <p>Currently, <%= it.totalUsers %>.</p>
+<h3>Is the data encrypted?</h3>
+<p>No. If you would like to help implement encryption, please get in touch on GitHub - Raphael would love for this to be a feature!</p>
 <h3>Where is the data stored? What is your privacy policy?</h3>
 <p>The data is stored on a server <a href="https://raphael.computer">Raphael</a> runs. He promises that he won't look at your private data. If you want to use <strong>Pointers</strong>, you are just going to have to trust him on this.</p>
 <p>The data will never be sold or shared with third parties. If you delete your account, your data is truly gone.</p>
