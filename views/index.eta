@@ -13,7 +13,7 @@
     <strong>Pointers</strong> is similar to other 'link in bio' or 'landing page' services, with the following differences:
     <ul>
         <li>Your links are private by default and are only visible to people you approve.</li>
-        <li>It is completely free for ever and open source.</li>
+        <li>It is free and open source.</li>
         <li>It has no analytics or tracking.</li>
         <li>It is a sort of pink color, which is nice.</li>
     </ul>
@@ -39,4 +39,4 @@
 <h3>Would you consider making Pointers federated?</h3>
 <p>Maybe.</p>
 <h3>I don't like the pink color.</h3>
-<p>Consider <a href="https://www.tampermonkey.net/">userscripts</a>.
+<p>Consider <a href="https://www.tampermonkey.net/">userscripts</a>. If you have a genuine accessibility concern, please do get in touch.

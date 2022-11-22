@@ -22,7 +22,7 @@
             </header>
         </div>
     <% }) %>
-    <form action="/api/name" method="post" class="inline-form">
+    <form action="/api/name" method="post" class="inline-form form--collapse">
         <input type="text" name="name" placeholder="Name" />
         <input type="submit" value="Add name" />
     </form>
