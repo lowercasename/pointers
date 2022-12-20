@@ -94,7 +94,19 @@
                 <div>
                     <a href="/u/<%= accessRequest.requestee?.hash %>"><%= accessRequest.requestee?.UserNames?.name %></a>
                 </div>
-                <span class="badge"><% if (accessRequest.accepted === 1) { %>accepted<% } else if (accessRequest.pending === 1) { %>pending<% } else { %>rejected<% } %></span>
+                <span class="badge">
+                    <% if (accessRequest.accepted === 1) { %>
+                        <% if (accessRequest.expiry < new Date() ) { %>
+                            expired
+                        <% } else { %>
+                            accepted
+                        <% } %>
+                    <% } else if (accessRequest.pending === 1) { %>
+                        pending
+                    <% } else { %>
+                        rejected
+                    <% } %>
+                </span>
             </header>
             <% if (accessRequest.expiry > new Date() ) { %>
                 <p class="description">Expires <%= accessRequest.expiry.toLocaleString() %></p>
