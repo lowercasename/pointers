@@ -234,7 +234,6 @@ frontend.get('/search', redirectIfNotLoggedIn, async (req, res) => {
 });
 
 frontend.get('/u/:hash', async (req, res) => {
-    console.log('getting user');
     const { hash } = req.params;
     const user = await sequelize.models.User.findAll({
         where: { hash },

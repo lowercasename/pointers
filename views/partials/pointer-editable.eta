@@ -1,8 +1,7 @@
 <div class="pointer item">
     <header>
-        <div>
-            <% if (it.icon) { %><img class="pointer__icon" src="<%= it.icon %>" /><% } %>
-            <strong><%= it.title %></strong>
+        <div class="pointer__icon-and-name">
+            <% if (it.icon) { %><img class="pointer__icon" src="<%= it.icon %>" /><% } else { %><span class="pointer__icon">➡️</span><% } %><strong><%= it.title %></strong>
         </div>
         <div>
             <a href="/pointer/<%= it.hash %>/edit">Edit</a> | <a href="/api/pointer/<%= it.hash %>/delete">Delete</a>
