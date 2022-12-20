@@ -96,6 +96,9 @@
                 </div>
                 <span class="badge"><% if (accessRequest.accepted === 1) { %>accepted<% } else if (accessRequest.pending === 1) { %>pending<% } else { %>rejected<% } %></span>
             </header>
+            <% if (accessRequest.expiry > new Date() ) { %>
+                <p class="description">Expires <%= accessRequest.expiry.toLocaleString() %></p>
+            <% } %>
         </div>
     <% }) %>
 </main>
