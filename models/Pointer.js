@@ -38,5 +38,15 @@ export default (sequelize) => {
             allowNull: true,
             defaultValue: '',
         },
+        image: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            defaultValue: '',
+        },
+        icon: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            defaultValue: '',
+        },
     });
 };

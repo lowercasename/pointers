@@ -7,6 +7,15 @@
     <input type="text" name="title" id="title" value="<%= it.pointer?.title %>" />
     <label for="url">URL</label>
     <input type="text" name="url" id="url" value="<%= it.pointer?.url %>"/>
+    <div class="edit__icon-field">
+        <label class="form-collapse">Icon</label>
+        <% if (it.pointer?.icon) { %>
+            <img src="<%= it.pointer?.icon %>" alt="Icon" class="edit__icon"/>
+        <% } else { %>
+            <span class="edit__no-icon">No icon</span>
+        <% } %>
+        <a href="/api/icon/<%= it.pointer?.hash %>/update" class="edit__icon-button">Update</a>
+    </div>
     <label for="description">Description (optional)</label>
     <textarea name="description" id="description"><%= it.pointer?.description %></textarea>
     <input type="hidden" name="hash" value="<%= it.pointer?.hash %>"/>

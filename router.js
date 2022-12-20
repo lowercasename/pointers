@@ -5,7 +5,12 @@ import crypto from 'crypto';
 import bcrypt from 'bcrypt';
 import mailgun from './lib/mailgun.js';
 import { redirectIfNotLoggedIn } from './lib/middleware.js';
-import { createPointer, deletePointer, updatePointer } from './lib/pointer.js';
+import {
+    createPointer,
+    deletePointer,
+    updatePointer,
+    updatePointerIcon,
+} from './lib/pointer.js';
 import { createName, deleteName, setNameAsMain } from './lib/name.js';
 import { deleteProfile, updateProfile } from './lib/profile.js';
 import {
@@ -139,7 +144,6 @@ frontend.get('/profile', redirectIfNotLoggedIn, async (req, res) => {
             nest: true,
         });
     }
-    console.log(pointers);
     res.render('profile', {
         user: { ...user, names: userNames },
         pointers,
@@ -230,6 +234,7 @@ frontend.get('/search', redirectIfNotLoggedIn, async (req, res) => {
 });
 
 frontend.get('/u/:hash', async (req, res) => {
+    console.log('getting user');
     const { hash } = req.params;
     const user = await sequelize.models.User.findAll({
         where: { hash },
@@ -241,7 +246,7 @@ frontend.get('/u/:hash', async (req, res) => {
             },
             {
                 model: sequelize.models.Pointer,
-                attributes: ['title', 'description', 'url'],
+                attributes: ['title', 'description', 'url', 'icon'],
             },
         ],
     });
@@ -250,6 +255,9 @@ frontend.get('/u/:hash', async (req, res) => {
     }
     if (res.locals.user?.id && user[0].id === res.locals.user?.id) {
         return res.redirect('/profile');
+    }
+    for (const pointer of user[0].Pointers) {
+        pointer.domain = new URL(pointer.url).hostname;
     }
     res.render('user', {
         user: user[0],
@@ -529,11 +537,17 @@ auth.post('/reset-password', (req, res) => {
     sequelize.models.User.findOne({ where: { resetToken } })
         .then((user) => {
             if (!user) {
-                req.flash('error', 'Invalid password reset token. Please reset your password again by visiting <a href="/forgot-password">this page</a>.');
+                req.flash(
+                    'error',
+                    'Invalid password reset token. Please reset your password again by visiting <a href="/forgot-password">this page</a>.',
+                );
                 return res.redirect(`/reset-password/${resetToken}`);
             }
             if (user.resetTokenExpiry < Date.now()) {
-                req.flash('error', 'Password reset token has expired. Please reset your password again by visiting <a href="/forgot-password">this page</a>.');
+                req.flash(
+                    'error',
+                    'Password reset token has expired. Please reset your password again by visiting <a href="/forgot-password">this page</a>.',
+                );
                 return res.redirect(`/reset-password/${resetToken}`);
             }
             const salt = bcrypt.genSaltSync(10);
@@ -643,6 +657,10 @@ api.post('/pointer', redirectIfNotLoggedIn, async (req, res) => {
 
 api.get('/pointer/:hash/delete', redirectIfNotLoggedIn, async (req, res) => {
     return deletePointer(req, res);
+});
+
+api.get('/icon/:hash/update', redirectIfNotLoggedIn, async (req, res) => {
+    return updatePointerIcon(req, res);
 });
 
 api.post('/profile', redirectIfNotLoggedIn, async (req, res) => {

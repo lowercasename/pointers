@@ -1,6 +1,9 @@
-<div class="pointer item">
-    <a href="<%= it.url %>" target="_blank" rel="nofollow"><%= it.title %></a>
+<a class="pointer item" href="<%= it.url %>" target="_blank" rel="nofollow">
+    <div class="pointer__title">
+        <% if (it.icon) { %><img class="pointer__icon" src="<%= it.icon %>" /><% } %>
+        <%= it.title %> <span class="pointer__domain"><%= it.domain %></span>
+    </div>
     <% if (it.description) { %>
         <p class="description"><%= it.description %></p>
     <% } %>
-</div>
+</a>
