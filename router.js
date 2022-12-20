@@ -253,7 +253,12 @@ frontend.get('/u/:hash', async (req, res) => {
         return res.render('404');
     }
     if (res.locals.user?.id && user[0].id === res.locals.user?.id) {
-        return res.redirect('/profile');
+        // This is the user's own profile
+        // If we've passed viewAs in the query string, we want to view the profile
+        // otherwise we want to redirect to /profile
+        if (!req.query.viewAs) {
+            return res.redirect('/profile');
+        }
     }
     for (const pointer of user[0].Pointers) {
         pointer.domain = new URL(pointer.url).hostname;
