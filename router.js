@@ -252,20 +252,53 @@ frontend.get('/u/:hash', async (req, res) => {
     if (!user.length) {
         return res.render('404');
     }
-    if (res.locals.user?.id && user[0].id === res.locals.user?.id) {
-        // This is the user's own profile
-        // If we've passed viewAs in the query string, we want to view the profile
-        // otherwise we want to redirect to /profile
+    let viewingUser;
+    // If we've passed viewAs in the query string, and this is the user's own profile,
+    // we want to view the profile as a specific user, otherwise we want to redirect to /profile
+    if (user[0].id === res.locals.user?.id) {
+        // If we _haven't_ passed viewAs in the query string, we redirect to /profile
         if (!req.query.viewAs) {
             return res.redirect('/profile');
         }
+        // From here, we have viewAs in the query string and we're viewing our own profile
+        const viewAs = await sequelize.models.User.findOne({
+            where: { hash: req.query.viewAs },
+            attributes: ['id', 'emailAddress', 'bio', 'avatar', 'hash'],
+            include: [
+                {
+                    model: sequelize.models.UserName,
+                    attributes: ['name', 'main'],
+                },
+            ],
+        });
+        if (!viewAs) {
+            return res.redirect('/profile');
+        }
+        viewingUser = viewAs;
+    } else {
+        // If this is not your own profile and you've passed viewAs in the query string,
+        // we redirect to /u/:hash, removing the viewAs query string
+        if (req.query.viewAs) {
+            return res.redirect(`/u/${hash}`);
+        }
+        // Otherwise, we set the viewing user to your own user
+        const ownProfile = await sequelize.models.User.findOne({
+            where: { id: res.locals.user?.id },
+            attributes: ['id', 'emailAddress', 'bio', 'avatar', 'hash'],
+        });
+        viewingUser = ownProfile;
     }
     for (const pointer of user[0].Pointers) {
         pointer.domain = new URL(pointer.url).hostname;
     }
+    console.log(viewingUser.id);
+    console.log(user[0].id);
     res.render('user', {
+        areViewingAs: !!req.query.viewAs,
+        viewingUser: viewingUser,
+        isOwnProfile: user[0].id === viewingUser.id,
         user: user[0],
-        access: await getAccess(res.locals.user?.id, user[0].id),
+        access: await getAccess(viewingUser.id, user[0].id),
     });
 });
 

@@ -1,5 +1,11 @@
 <% layout('./layout') %>
 
+<% if (it.areViewingAs) { %>
+    <p class="message message--info">
+        This is a preview of your profile<% if (!it.isOwnProfile) { %> as it would appear to <a href="/u/<%= it.viewingUser?.hash %>"><%= it.viewingUser?.UserNames?.filter((name) => name.main)?.[0]?.name %></a>.<% } else { %>.<% } %>
+    </p>
+<% } %>
+
 <h2><%= it.user?.UserNames?.map((name) => name.name).join(' / ') %></h2>
 <% if (it.user?.bio) { %><p class="description"><%= it.user.bio %></p><% } %>
 
@@ -17,9 +23,20 @@
 <% } else { %>
     <%~ includeFile('./partials/flash.eta', it) %>
     <form action="/api/access-request/<%= it.user?.hash %>" method="post" class="inline-form">
-        <textarea name="message" placeholder="Let them know who you are and where they know you from!"></textarea>
-        <input type="submit" value="Request access to this user's pointers">
+        <textarea
+            name="message"
+            placeholder="Let them know who you are and where they know you from!"
+            <% if (it.areViewingAs) { %>disabled<% } %>
+        ></textarea>
+        <input
+            type="submit"
+            value="Request access to this user's pointers"
+            <% if (it.areViewingAs) { %>disabled<% } %>
+        >
     </form>
+<% } %>
+<% if (!it.areViewingAs) { %>
+    <a href="/u/<%= it.viewingUser?.hash %>?viewAs=<%= it.user?.hash %>">Preview your profile as this user</a>    
 <% } %>
 <% } else { %>
     <p>You need to be logged in to view this user's pointers.</p>

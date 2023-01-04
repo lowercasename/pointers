@@ -6,7 +6,7 @@
     <label for="emailAddress">Email address</label>
     <input id="emailAddress" name="emailAddress" type="email" autocomplete="emailAddress" required value="<%= it.user?.emailAddress %>" />
     <small>If you change your email address, you will be logged out and sent an email to revalidate it.</small><br><br>
-    <label for="bio">Write something about yourself. This will be publicly visible to anyone searching for one of your names.</label>
+    <label for="bio">Write something about yourself. This will be publicly visible to anyone searching for one of your names. (Maximum 500 characters).</label>
     <textarea id="bio" name="bio"><%= it.user?.bio || "" %></textarea>
     <label for="pointerAccessDuration">How long should other users be able to view your pointers after you have accepted their request?</label>
     <select id="pointerAccessDuration" name="pointerAccessDuration">

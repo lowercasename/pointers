@@ -4,13 +4,16 @@
     <h2>
         Your profile
     </h2>
-    <a href="/profile/edit">Edit profile</a>
+    <div>
+        <a href="/profile/edit">Edit profile</a> | <a href="/u/<%= it.user?.hash %>?viewAs=<%= it.user?.hash %>">Preview profile</a>
+    </div>
 </nav>
 <main>
     <%~ includeFile('./partials/flash.eta', it) %>
     <h3>Share your user page with others</h3>
     <p>
         Copy this link: <a href="https://pointers.website/u/<%= it.user?.hash %>">https://pointers.website/u/<%= it.user?.hash %></a>
+    </p>
     <hr>
     <h3>Your names</h3>
     <p class="explainer">These are the names by which others can find you. They are all publicly searchable.</p>
@@ -29,11 +32,13 @@
     <hr />
     <h3>Your bio</h3>
     <p class="explainer">Some information about you. This is publicly visible.</p>
-    <% if (it.user?.bio) { %>
-        <%= it.user.bio %>
-    <% } else { %>
-        <p>You haven't written a bio yet.</p>
-    <% } %>
+    <div class="item">
+        <% if (it.user?.bio) { %>
+            <%= it.user.bio %>
+        <% } else { %>
+            <p>You haven't written a bio yet.</p>
+        <% } %>
+    </div>
     <hr>
     <h3>Your pointers</h3>
     <p class="explainer">These are the links to your online presence which you can share with your friends.</p>
