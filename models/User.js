@@ -55,5 +55,20 @@ export default function (sequelize) {
             allowNull: true,
             defaultValue: '',
         },
+        encryptedKey: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            defaultValue: '',
+        },
+        publicKey: {
+            type: DataTypes.TEXT,
+            allowNull: true,
+            defaultValue: '',
+        },
+        privateKey: {
+            type: DataTypes.TEXT,
+            allowNull: true,
+            defaultValue: '',
+        },
     });
 }

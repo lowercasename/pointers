@@ -2,22 +2,9 @@ import { DataTypes } from 'sequelize';
 
 export default (sequelize) => {
     sequelize.define('Pointer', {
-        title: {
-            type: DataTypes.STRING,
+        data: {
+            type: DataTypes.TEXT,
             allowNull: false,
-        },
-        url: {
-            type: DataTypes.STRING,
-            allowNull: false,
-        },
-        description: {
-            type: DataTypes.STRING,
-            allowNull: true,
-        },
-        tags: {
-            type: DataTypes.STRING,
-            allowNull: true,
-            defaultValue: '',
         },
         public: {
             type: DataTypes.BOOLEAN,
@@ -34,16 +21,6 @@ export default (sequelize) => {
             allowNull: true,
         },
         hash: {
-            type: DataTypes.STRING,
-            allowNull: true,
-            defaultValue: '',
-        },
-        image: {
-            type: DataTypes.STRING,
-            allowNull: true,
-            defaultValue: '',
-        },
-        icon: {
             type: DataTypes.STRING,
             allowNull: true,
             defaultValue: '',
