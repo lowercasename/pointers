@@ -20,8 +20,6 @@ module.exports = {
             allowNull: true,
             defaultValue: '',
         });
-        // Remove encryptedKey column from Users table
-        await queryInterface.removeColumn('Users', 'encryptedKey');
     },
 
     async down(queryInterface, Sequelize) {
@@ -34,11 +32,5 @@ module.exports = {
         // Remove publicKey and privateKey columns from Users table
         await queryInterface.removeColumn('Users', 'publicKey');
         await queryInterface.removeColumn('Users', 'privateKey');
-        // Add encryptedKey column to Users table
-        await queryInterface.addColumn('Users', 'encryptedKey', {
-            type: Sequelize.TEXT,
-            allowNull: true,
-            defaultValue: '',
-        });
     },
 };

@@ -9,9 +9,11 @@ module.exports = {
          * Example:
          * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
          */
-        // Change encryptedKey type to TEXT
-        await queryInterface.changeColumn('Users', 'encryptedKey', {
-            type: Sequelize.TEXT,
+        // Change unique constraint on emailAddress column from true to 'emailAddress'
+        await queryInterface.changeColumn('Users', 'emailAddress', {
+            type: Sequelize.STRING,
+            allowNull: false,
+            unique: 'emailAddress',
         });
     },
 
@@ -22,9 +24,11 @@ module.exports = {
          * Example:
          * await queryInterface.dropTable('users');
          */
-        // Change encryptedKey type to STRING
-        await queryInterface.changeColumn('Users', 'encryptedKey', {
+        // Change unique constraint on emailAddress column from 'emailAddress' to true
+        await queryInterface.changeColumn('Users', 'emailAddress', {
             type: Sequelize.STRING,
+            allowNull: false,
+            unique: true,
         });
     },
 };

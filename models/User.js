@@ -5,7 +5,7 @@ export default function (sequelize) {
         emailAddress: {
             type: DataTypes.STRING,
             allowNull: false,
-            unique: true,
+            unique: 'emailAddress',
         },
         password: {
             type: DataTypes.STRING,
