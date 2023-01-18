@@ -30,13 +30,13 @@
 <h3>How many people are using Pointers?</h3>
 <p>Currently, <%= it.totalUsers %>.</p>
 <h3>Is the data encrypted?</h3>
-<p>No. If you would like to help implement encryption, please get in touch on GitHub - Raphael would love for this to be a feature!</p>
+<p>Yes! All pointer data is stored encrypted in the database and is encrypted and decrypted on the server. This protects your pointer data from being read if the database is accessed by an attacker. Your names and bio are not encrypted, as these are public.</p>
 <h3>Where is the data stored? What is your privacy policy?</h3>
-<p>The data is stored on a server <a href="https://raphael.computer">Raphael</a> runs. He promises that he won't look at your private data. If you want to use <strong>Pointers</strong>, you are just going to have to trust him on this.</p>
+<p>The data is stored on a server <a href="https://raphael.computer">Raphael</a> runs. If he If you want to use <strong>Pointers</strong>, you are just going to have to trust him on this.</p>
 <p>The data will never be sold or shared with third parties. If you delete your account, your data is truly gone.</p>
 <h3>What is your code of conduct?</h3>
 <p><strong>Pointers</strong> is designed to share links, nothing more. If you use it for spam or to harass or dox others, your account will be deleted.</p>
-<p>We are not responsible for the content of the links you share. If you share a link that is illegal or harmful, you are responsible for it, and if you are reported, your account will be deleted.</p>
+<p>We are not responsible for the content of the links you share. We can't see your links, so we will get in touch and ask to see a screenshot of your account if you've been reported by another user. If you are found to be sharing something illegal or harmful, including links to illegal websites, we will delete your account.</p>
 <p>If you see any content on <strong>Pointers</strong> that troubles you, please let Raphael know and he will deal with it!</p>
 <h3>How do I get in touch with you?</h3>
 <p>You can email Raphael at <a href="mailto:contact@pointers.website">contact@pointers.website</a>.
