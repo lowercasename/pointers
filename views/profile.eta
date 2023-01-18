@@ -5,7 +5,7 @@
         Your profile
     </h2>
     <div>
-        <a href="/profile/edit">Edit profile</a> | <a href="/u/<%= it.user?.hash %>?viewAs=<%= it.user?.hash %>">Preview profile</a>
+        <a href="/profile/edit">Edit profile</a>
     </div>
 </nav>
 <main>

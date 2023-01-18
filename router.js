@@ -4,10 +4,13 @@ import { Op } from 'sequelize';
 import crypto from 'crypto';
 import bcrypt from 'bcrypt';
 import mailgun from './lib/mailgun.js';
-import { redirectIfNotLoggedIn } from './lib/middleware.js';
+import {
+    redirectIfNotLoggedIn,
+    deleteExpiredPointerKeys,
+} from './lib/middleware.js';
 import {
     createPointer,
-    decryptPointerData,
+    decryptPointer,
     deletePointer,
     encryptPointerData,
     updatePointer,
@@ -25,13 +28,14 @@ import {
     deriveKey,
     encrypt,
     encryptRsa,
-    decryptRsa,
     generateKeyPair,
 } from './lib/encryption.js';
 
 const api = express.Router();
 const frontend = express.Router();
 const auth = express.Router();
+
+frontend.all('*', deleteExpiredPointerKeys);
 
 frontend.get('/', async (req, res) => {
     const totalUsers = await sequelize.models.User.count();
@@ -114,15 +118,7 @@ frontend.get('/reset-password/:resetToken', async (req, res) => {
 frontend.get('/profile', redirectIfNotLoggedIn, async (req, res) => {
     const user = await sequelize.models.User.findOne({
         where: { emailAddress: res.locals.user.emailAddress },
-        attributes: [
-            'id',
-            'emailAddress',
-            'bio',
-            'avatar',
-            'hash',
-            'encryptedKey',
-        ],
-        // raw: true,
+        attributes: ['id', 'emailAddress', 'bio', 'avatar', 'hash'],
     });
     const userNames = await sequelize.models.UserName.findAll({
         where: { UserId: res.locals.user.id },
@@ -130,8 +126,8 @@ frontend.get('/profile', redirectIfNotLoggedIn, async (req, res) => {
     });
     const pointers = await sequelize.models.Pointer.findAll({
         where: { UserId: res.locals.user.id },
-        include: [sequelize.models.PointerKey],
         raw: true,
+        nest: true,
     });
     const accessRequestsAsRequestee =
         await sequelize.models.AccessRequest.findAll({
@@ -161,29 +157,22 @@ frontend.get('/profile', redirectIfNotLoggedIn, async (req, res) => {
             nest: true,
         });
     }
-    console.log(pointers);
-    // // Decrypt the pointers with our private key
-    // // First, use the password-derived key to decrypt the private key
-    // const passwordDerivedKey = req.session.user.key;
-    // const privateKey = await user.getPrivateKey(passwordDerivedKey);
-    // // Then, use the private key to decrypt the pointer decryption key
-
-    // pointers.forEach((pointer) => {
-    //     pointer.data = decryptPointerData()
-    //     pointer.title = decryptRsa(pointer.title, privateKey);
-    //     pointer.description = pointer.description
-    //         ? decryptRsa(pointer.description, privateKey)
-    //         : null;
-    //     pointer.url = decryptRsa(pointer.url, privateKey);
-    //     pointer.icon = pointer.icon
-    //         ? decryptRsa(pointer.icon, privateKey)
-    //         : null;
-    //     pointer.image = pointer.image
-    //         ? decryptRsa(pointer.image, privateKey)
-    //         : null;
-    // });
+    // Decrypt the pointers with our private key
+    for (const pointer of pointers) {
+        try {
+            pointer.data = await decryptPointer(
+                pointer.hash,
+                req.session.user.id,
+                req.session.user.key,
+            );
+            pointer.PointerKeys = undefined;
+        } catch (err) {
+            console.error(err);
+            return res.render('404');
+        }
+    }
     res.render('profile', {
-        user: { ...user, names: userNames },
+        user: { ...user.toJSON(), names: userNames },
         pointers,
         accessRequestsAsRequestee,
         accessRequestsAsRequester,
@@ -199,11 +188,21 @@ frontend.get('/pointer/:hash/edit', redirectIfNotLoggedIn, async (req, res) => {
         req.flash('error', 'You do not have permission to edit this pointer.');
         return res.redirect('/profile');
     }
-    res.render('edit-pointer', {
-        error: req.flash('error'),
-        success: req.flash('success'),
-        pointer,
-    });
+    try {
+        pointer.data = await decryptPointer(
+            pointer.hash,
+            req.session.user.id,
+            req.session.user.key,
+        );
+        res.render('edit-pointer', {
+            error: req.flash('error'),
+            success: req.flash('success'),
+            pointer,
+        });
+    } catch (err) {
+        console.error(err);
+        return res.render('404');
+    }
 });
 
 frontend.get('/profile/edit', redirectIfNotLoggedIn, async (req, res) => {
@@ -239,17 +238,14 @@ frontend.get('/search', redirectIfNotLoggedIn, async (req, res) => {
     });
     const users = userNames.reduce((acc, curr) => {
         if (!curr.User?.id) {
-            console.log('no user');
             return acc;
         }
         if (!acc.find((user) => user.id === curr.User.id)) {
-            console.log('pushing user');
             acc.push({
                 ...curr.User,
                 names: [{ name: curr.name, main: curr.main }],
             });
         } else {
-            console.log('pushing name');
             acc.find((user) => user.id === curr.User.id).names.push({
                 name: curr.name,
                 main: curr.main,
@@ -273,7 +269,7 @@ frontend.get('/search', redirectIfNotLoggedIn, async (req, res) => {
 
 frontend.get('/u/:hash', async (req, res) => {
     const { hash } = req.params;
-    const user = await sequelize.models.User.findAll({
+    const user = await sequelize.models.User.findOne({
         where: { hash },
         attributes: ['id', 'emailAddress', 'bio', 'avatar', 'hash'],
         include: [
@@ -281,62 +277,38 @@ frontend.get('/u/:hash', async (req, res) => {
                 model: sequelize.models.UserName,
                 attributes: ['name', 'main'],
             },
-            {
-                model: sequelize.models.Pointer,
-                attributes: ['title', 'description', 'url', 'icon'],
-            },
         ],
     });
-    if (!user.length) {
+    if (!user) {
         return res.render('404');
     }
-    let viewingUser;
-    // If we've passed viewAs in the query string, and this is the user's own profile,
-    // we want to view the profile as a specific user, otherwise we want to redirect to /profile
-    if (user[0].id === res.locals.user?.id) {
-        // If we _haven't_ passed viewAs in the query string, we redirect to /profile
-        if (!req.query.viewAs) {
-            return res.redirect('/profile');
+    const pointers = await sequelize.models.Pointer.findAll({
+        where: { UserId: user.id },
+        attributes: ['data', 'id', 'hash'],
+    });
+    const viewingUser = await sequelize.models.User.findOne({
+        where: { id: res.locals.user?.id },
+    });
+    // Attempt to decrypt the pointers
+    const decryptedPointers = [];
+    for (const pointer of pointers) {
+        const pointerData = await decryptPointer(
+            pointer.hash,
+            viewingUser.id,
+            req.session.user.key,
+        );
+        if (!pointerData) {
+            // We can't decrypt this pointer, so skip it
+            continue;
         }
-        // From here, we have viewAs in the query string and we're viewing our own profile
-        const viewAs = await sequelize.models.User.findOne({
-            where: { hash: req.query.viewAs },
-            attributes: ['id', 'emailAddress', 'bio', 'avatar', 'hash'],
-            include: [
-                {
-                    model: sequelize.models.UserName,
-                    attributes: ['name', 'main'],
-                },
-            ],
-        });
-        if (!viewAs) {
-            return res.redirect('/profile');
-        }
-        viewingUser = viewAs;
-    } else {
-        // If this is not your own profile and you've passed viewAs in the query string,
-        // we redirect to /u/:hash, removing the viewAs query string
-        if (req.query.viewAs) {
-            return res.redirect(`/u/${hash}`);
-        }
-        // Otherwise, we set the viewing user to your own user
-        const ownProfile = await sequelize.models.User.findOne({
-            where: { id: res.locals.user?.id },
-            attributes: ['id', 'emailAddress', 'bio', 'avatar', 'hash'],
-        });
-        viewingUser = ownProfile;
+        pointerData.domain = new URL(pointerData.url).hostname;
+        pointer.data = pointerData;
+        decryptedPointers.push(pointer);
     }
-    for (const pointer of user[0].Pointers) {
-        pointer.domain = new URL(pointer.url).hostname;
-    }
-    console.log(viewingUser.id);
-    console.log(user[0].id);
     res.render('user', {
-        areViewingAs: !!req.query.viewAs,
-        viewingUser: viewingUser,
-        isOwnProfile: user[0].id === viewingUser.id,
-        user: user[0],
-        access: await getAccess(viewingUser.id, user[0].id),
+        user,
+        pointers: decryptedPointers,
+        access: await getAccess(viewingUser.id, user.id),
     });
 });
 
@@ -401,12 +373,20 @@ auth.post('/login', (req, res) => {
                             },
                         );
                         for (const pointer of pointers) {
+                            // Check if the pointer data is already encrypted
+                            // by attempting to JSON parse it
+                            try {
+                                JSON.parse(pointer.data);
+                            } catch (e) {
+                                // The pointer data is already encrypted, so we can skip it
+                                continue;
+                            }
                             const { encryptedData, pointerKey } =
-                                encryptPointerData();
+                                encryptPointerData(JSON.parse(pointer.data));
                             // Encrypt the pointer key with the user's public key
                             const encryptedKey = encryptRsa(
                                 pointerKey,
-                                res.locals.user.publicKey,
+                                publicKey,
                             );
                             // Save the pointer
                             await sequelize.models.Pointer.update(
@@ -416,8 +396,8 @@ auth.post('/login', (req, res) => {
                                 { where: { id: pointer.id } },
                             );
                             // Save the encrypted pointer key
-                            sequelize.models.PointerKey.create({
-                                UserId: res.locals.user.id,
+                            await sequelize.models.PointerKey.create({
+                                UserId: user.id,
                                 PointerId: pointer.id,
                                 encryptedKey,
                             });
@@ -535,6 +515,7 @@ auth.post('/register', (req, res) => {
                     salt,
                     validationToken,
                     publicKey,
+                    privateKey: encryptedPrivateKey,
                 })
                     .then((user) => {
                         // Create a new UserName for each name

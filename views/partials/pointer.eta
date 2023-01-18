@@ -1,9 +1,9 @@
-<a class="pointer item" href="<%= it.url %>" target="_blank" rel="nofollow">
+<a class="pointer item" href="<%= it.data.url %>" target="_blank" rel="nofollow">
     <div class="pointer__title">
-        <% if (it.icon) { %><img class="pointer__icon" src="<%= it.icon %>" /><% } else { %><span class="pointer__icon">➡️</span><% } %>
-        <%= it.title %> <span class="pointer__domain"><%= it.domain %></span>
+        <% if (it.data.icon) { %><img class="pointer__icon" src="<%= it.data.icon %>" /><% } else { %><span class="pointer__icon">➡️</span><% } %>
+        <%= it.data.title %> <span class="pointer__domain"><%= it.data.domain %></span>
     </div>
-    <% if (it.description) { %>
-        <p class="description"><%= it.description %></p>
+    <% if (it.data.description) { %>
+        <p class="description"><%= it.data.description %></p>
     <% } %>
 </a>

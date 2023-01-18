@@ -4,20 +4,20 @@
 <form action="/api/pointer" method="post" class="inline-form">
     <%~ includeFile('./partials/flash.eta', it) %>
     <label for="title">Title</label>
-    <input type="text" name="title" id="title" value="<%= it.pointer?.title %>" />
+    <input type="text" name="title" id="title" value="<%= it.pointer?.data?.title %>" />
     <label for="url">URL</label>
-    <input type="text" name="url" id="url" value="<%= it.pointer?.url %>"/>
+    <input type="text" name="url" id="url" value="<%= it.pointer?.data?.url %>"/>
     <div class="edit__icon-field">
         <label class="form-collapse">Icon</label>
-        <% if (it.pointer?.icon) { %>
-            <img src="<%= it.pointer?.icon %>" alt="Icon" class="edit__icon"/>
+        <% if (it.pointer?.data?.icon) { %>
+            <img src="<%= it.pointer?.data?.icon %>" alt="Icon" class="edit__icon"/>
         <% } else { %>
             <span class="edit__no-icon">No icon</span>
         <% } %>
         <a href="/api/icon/<%= it.pointer?.hash %>/update" class="edit__icon-button">Update</a>
     </div>
     <label for="description">Description (optional)</label>
-    <textarea name="description" id="description"><%= it.pointer?.description %></textarea>
+    <textarea name="description" id="description"><%= it.pointer?.data?.description %></textarea>
     <input type="hidden" name="hash" value="<%= it.pointer?.hash %>"/>
     <input type="hidden" name="_method" value="put" />
     <input type="submit" value="Edit pointer" />

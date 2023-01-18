@@ -1,14 +1,15 @@
 <div class="pointer item">
+<% it %>
     <header>
         <div class="pointer__icon-and-name">
-            <% if (it.icon) { %><img class="pointer__icon" src="<%= it.icon %>" /><% } else { %><span class="pointer__icon">➡️</span><% } %><strong><%= it.title %></strong>
+            <% if (it.data.icon) { %><img class="pointer__icon" src="<%= it.data.icon %>" /><% } else { %><span class="pointer__icon">➡️</span><% } %><strong><%= it.data.title %></strong>
         </div>
         <div>
             <a href="/pointer/<%= it.hash %>/edit">Edit</a> | <a href="/api/pointer/<%= it.hash %>/delete">Delete</a>
         </div>
     </header>
-    <a href="<%= it.url %>"><%= it.url %></a>
-    <% if (it.description) { %>
-        <p class="description"><%= it.description %></p>
+    <a href="<%= it.data.url %>"><%= it.data.url %></a>
+    <% if (it.data.description) { %>
+        <p class="description"><%= it.data.description %></p>
     <% } %>
 </div>
