@@ -32,7 +32,7 @@
 <h3>Is the data encrypted?</h3>
 <p>Yes! All pointer data is stored encrypted in the database and is encrypted and decrypted on the server. This protects your pointer data from being read if the database is accessed by an attacker. Your names and bio are not encrypted, as these are public.</p>
 <h3>Where is the data stored? What is your privacy policy?</h3>
-<p>The data is stored on a server <a href="https://raphael.computer">Raphael</a> runs. If he If you want to use <strong>Pointers</strong>, you are just going to have to trust him on this.</p>
+<p>The data is stored on a server <a href="https://raphael.computer">Raphael</a> runs. He promises that he won't look at your private data. If you want to use <strong>Pointers</strong>, you are just going to have to trust him on this.</p>
 <p>The data will never be sold or shared with third parties. If you delete your account, your data is truly gone.</p>
 <h3>What is your code of conduct?</h3>
 <p><strong>Pointers</strong> is designed to share links, nothing more. If you use it for spam or to harass or dox others, your account will be deleted.</p>
