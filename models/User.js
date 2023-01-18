@@ -5,7 +5,7 @@ export default function (sequelize) {
         emailAddress: {
             type: DataTypes.STRING,
             allowNull: false,
-            unique: true,
+            unique: 'emailAddress',
         },
         password: {
             type: DataTypes.STRING,
@@ -52,6 +52,21 @@ export default function (sequelize) {
         },
         hash: {
             type: DataTypes.STRING,
+            allowNull: true,
+            defaultValue: '',
+        },
+        encryptedKey: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            defaultValue: '',
+        },
+        publicKey: {
+            type: DataTypes.TEXT,
+            allowNull: true,
+            defaultValue: '',
+        },
+        privateKey: {
+            type: DataTypes.TEXT,
             allowNull: true,
             defaultValue: '',
         },
