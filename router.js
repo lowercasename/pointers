@@ -117,7 +117,7 @@ frontend.get('/reset-password/:resetToken', async (req, res) => {
 
 frontend.get('/profile', redirectIfNotLoggedIn, async (req, res) => {
     const user = await sequelize.models.User.findOne({
-        where: { emailAddress: res.locals.user.emailAddress },
+        where: { id: res.locals.user.id },
         attributes: ['id', 'emailAddress', 'bio', 'avatar', 'hash'],
     });
     const userNames = await sequelize.models.UserName.findAll({
@@ -206,8 +206,12 @@ frontend.get('/pointer/:hash/edit', redirectIfNotLoggedIn, async (req, res) => {
 });
 
 frontend.get('/profile/edit', redirectIfNotLoggedIn, async (req, res) => {
+    const user = await sequelize.models.User.findOne({
+        where: { id: res.locals.user.id },
+        attributes: ['id', 'emailAddress', 'bio', 'avatar', 'hash'],
+    });
     res.render('edit-profile', {
-        user: res.locals.user,
+        user: user,
         error: req.flash('error'),
         success: req.flash('success'),
     });
