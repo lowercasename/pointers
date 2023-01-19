@@ -12,6 +12,7 @@
     <select id="pointerAccessDuration" name="pointerAccessDuration">
         <option value="1" <%= it.user?.pointerAccessDuration == 1 ? "selected" : "" %>>1 day</option>
         <option value="7" <%= it.user?.pointerAccessDuration == 7 ? "selected" : "" %>>1 week</option>
+        <option value="14" <%= it.user?.pointerAccessDuration == 14 ? "selected" : "" %>>2 weeks</option> 
         <option value="30" <%= it.user?.pointerAccessDuration == 30 ? "selected" : "" %>>1 month</option>
     </select>
     <button type="submit">Edit profile</button>
