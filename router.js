@@ -238,11 +238,8 @@ frontend.get('/search', redirectIfNotLoggedIn, async (req, res) => {
     for (const peer of peersConfig.peers) {
         try {
             const { data } = await axios.get(
-                `${peer.url}/api/search?q=${encodeURIComponent(q)}`,
+                `${peer.url}/api/users?q=${encodeURIComponent(q)}`,
             );
-            data.forEach((user) => {
-                user.peer = peer;
-            });
             users.push(...data);
         } catch (err) {
             // If it's a 404, it's because the peer is running an older version
