@@ -30,6 +30,8 @@ import {
     encryptRsa,
     generateKeyPair,
 } from './lib/encryption.js';
+import axios from 'axios';
+import { readFile } from 'fs/promises';
 
 const api = express.Router();
 const frontend = express.Router();
@@ -268,6 +270,32 @@ frontend.get('/search', redirectIfNotLoggedIn, async (req, res) => {
             }
         });
     });
+    // Add remote results from federated instances ('peers')
+    const peersConfig = JSON.parse(
+        await readFile(new URL('./config/peers.json', import.meta.url)),
+    );
+    console.log(peersConfig);
+    for (const peer of peersConfig.peers) {
+        try {
+            const host = new URL(peer.url).host;
+            console.log(
+                `${
+                    peer.url
+                }/.well-known/webfinger?resource=acct:${encodeURIComponent(
+                    q,
+                )}@${host}`,
+            );
+            // const { data } = await axios.get(
+            //     `${
+            //         peer.url
+            //     }/.well-known/webfinger?resource=acct:${encodeURIComponent(
+            //         q,
+            //     )}@${peer.host}`,
+            // );
+        } catch (err) {
+            console.error(err);
+        }
+    }
     res.render('search', { users, q });
 });
 
@@ -325,6 +353,87 @@ frontend.get('/u/:hash', async (req, res) => {
             access: await getAccess(null, user.id),
         });
     }
+});
+
+// Webfinger-based user discovery
+// Because users' usernames are not unique (for instance, two people could both
+// be using the username "hunter2"), but searching is based exclusively on
+// usernames, we return a definitely non-spec-compliant webfinger response - an
+// array of compliant webfinger response objects, one per user with the given username.
+//
+// Example:
+// Query: https://pointers.website/.well-known/webfinger?resource=acct:hunter2@pointers.website
+// Response:
+// [
+//     {
+//         subject: 'acct:hunter2@pointers.website',
+//         links: [
+//             {
+//                 rel: 'http://webfinger.net/rel/profile-page',
+//                 type: 'text/html',
+//                 href: 'https://pointers.website/u/a1b2c3',
+//             },
+//         ],
+//     },
+//     {
+//         subject: 'acct:hunter2@pointers.website',
+//         links: [
+//             {
+//                 rel: 'http://webfinger.net/rel/profile-page',
+//                 type: 'text/html',
+//                 href: 'https://pointers.website/u/z9y8x7',
+//             },
+//         ],
+//     },
+// ];
+frontend.get('/.well-known/webfinger', async (req, res) => {
+    const { resource } = req.query;
+    if (!resource) {
+        return res.status(400).send('Missing resource parameter.');
+    }
+    if (!resource.startsWith('acct:')) {
+        return res.status(400).send('Invalid resource.');
+    }
+    const [username, domain] = resource.split('acct:')[1].split('@');
+    if (domain !== process.env.DOMAIN) {
+        return res.status(400).send('Invalid domain.');
+    }
+    const users = await sequelize.models.User.findAll({
+        where: {
+            '$UserNames.name$': username,
+        },
+        attributes: ['hash'],
+        include: [
+            {
+                model: sequelize.models.UserName,
+                attributes: ['name', 'main'],
+            },
+        ],
+    });
+    if (users.length === 0) {
+        return res.status(404).send('Account not found.');
+    }
+    for (const user of users) {
+        user.UserNames = await sequelize.models.UserName.findAll({
+            where: { UserId: user.id },
+            attributes: ['name', 'main'],
+        });
+    }
+    // Return the webfinger response
+    res.json(
+        users.map((user) => ({
+            subject: `acct:${
+                user.UserNames.find((n) => n.main === true).name
+            }@${process.env.DOMAIN}`,
+            links: [
+                {
+                    rel: 'http://webfinger.net/rel/profile-page',
+                    type: 'text/html',
+                    href: `https://${process.env.DOMAIN}/u/${user.hash}`,
+                },
+            ],
+        })),
+    );
 });
 
 api.get('/healthcheck', (req, res) => {
