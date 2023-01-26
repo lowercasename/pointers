@@ -402,7 +402,7 @@ frontend.get('/.well-known/webfinger', async (req, res) => {
         where: {
             '$UserNames.name$': username,
         },
-        attributes: ['hash'],
+        attributes: ['id', 'hash'],
         include: [
             {
                 model: sequelize.models.UserName,
