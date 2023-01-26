@@ -12,7 +12,7 @@
     <% if (it.users.length > 0) { %>
         <% it.users.forEach((user) => { %>
             <div class="user item">
-                <a href="/u/<%= user.hash %>"><%= user.names[0].name %></a>
+                <a href="<%= user.url %>"><% if (user.peer) {%><%= user.names[0].absolute %><% } else { %><%= user.names[0].name %><% } %></a>
                 <% if (user.bio) { %><p class="description"><%= user.bio %></p><% } %>
             </div>
         <% }) %>
