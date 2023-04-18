@@ -290,30 +290,41 @@ frontend.get('/u/:hash', async (req, res) => {
         where: { UserId: user.id },
         attributes: ['data', 'id', 'hash'],
     });
-    const viewingUser = await sequelize.models.User.findOne({
-        where: { id: res.locals.user?.id },
-    });
-    // Attempt to decrypt the pointers
-    const decryptedPointers = [];
-    for (const pointer of pointers) {
-        const pointerData = await decryptPointer(
-            pointer.hash,
-            viewingUser.id,
-            req.session.user.key,
-        );
-        if (!pointerData) {
-            // We can't decrypt this pointer, so skip it
-            continue;
+    try {
+        const viewingUser = await sequelize.models.User.findOne({
+            where: { id: res.locals.user?.id },
+        });
+        // Attempt to decrypt the pointers
+        const decryptedPointers = [];
+        for (const pointer of pointers) {
+            const pointerData = await decryptPointer(
+                pointer.hash,
+                viewingUser.id,
+                req.session.user.key,
+            );
+            if (!pointerData) {
+                // We can't decrypt this pointer, so skip it
+                continue;
+            }
+            pointerData.domain = new URL(pointerData.url).hostname;
+            pointer.data = pointerData;
+            decryptedPointers.push(pointer);
         }
-        pointerData.domain = new URL(pointerData.url).hostname;
-        pointer.data = pointerData;
-        decryptedPointers.push(pointer);
+        res.render('user', {
+            user,
+            pointers: decryptedPointers,
+            access: await getAccess(viewingUser.id, user.id),
+        });
+    } catch (err) {
+        // If there isn't a user session (we're not logged in), then we can't decrypt
+        // the pointers, so we just bail here
+        console.error(err);
+        return res.render('user', {
+            user,
+            pointers: [],
+            access: await getAccess(null, user.id),
+        });
     }
-    res.render('user', {
-        user,
-        pointers: decryptedPointers,
-        access: await getAccess(viewingUser.id, user.id),
-    });
 });
 
 api.get('/healthcheck', (req, res) => {
