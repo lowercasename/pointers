@@ -240,6 +240,10 @@ frontend.get('/search', redirectIfNotLoggedIn, async (req, res) => {
             const { data } = await axios.get(
                 `${peer.url}/api/users?q=${encodeURIComponent(q)}`,
             );
+            // Add the 'remote' property to each user so we can render them differently
+            data.forEach((user) => {
+                user.remote = true;
+            });
             users.push(...data);
         } catch (err) {
             // If it's a 404, it's because the peer is running an older version
