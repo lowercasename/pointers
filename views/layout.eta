@@ -10,7 +10,7 @@
         <header id="header">
             <div id="logo">
                 <img src="/images/arrow.png" alt="logo" />
-                <h1><a href="/">Pointers</a></h1>
+                <h1><a href="/">Pointers</a> // <span class="subheading"><%= process.env.DOMAIN %></span></h1>
             </div>
             <nav id="main-nav">
                 <%~ includeFile('./partials/navigation.eta', it) %>
