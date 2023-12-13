@@ -30,6 +30,9 @@ import {
     encryptRsa,
     generateKeyPair,
 } from './lib/encryption.js';
+import axios from 'axios';
+import { readFile } from 'fs/promises';
+import { searchUsers } from './lib/search.js';
 
 const api = express.Router();
 const frontend = express.Router();
@@ -227,47 +230,29 @@ frontend.get('/search', redirectIfNotLoggedIn, async (req, res) => {
             error: 'Search query must be at least 3 characters long.',
         });
     }
-    const userNames = await sequelize.models.UserName.findAll({
-        where: {
-            name: {
-                [Op.substring]: q,
-            },
-        },
-        include: {
-            model: sequelize.models.User,
-            attributes: ['id', 'emailAddress', 'bio', 'avatar', 'hash'],
-        },
-        raw: true,
-        nest: true,
-    });
-    const users = userNames.reduce((acc, curr) => {
-        if (!curr.User?.id) {
-            return acc;
-        }
-        if (!acc.find((user) => user.id === curr.User.id)) {
-            acc.push({
-                ...curr.User,
-                names: [{ name: curr.name, main: curr.main }],
+    const users = await searchUsers(q);
+    // Add remote results from federated instances ('peers')
+    const peersConfig = JSON.parse(
+        await readFile(new URL('./config/peers.json', import.meta.url)),
+    );
+    for (const peer of peersConfig.peers) {
+        try {
+            const { data } = await axios.get(
+                `${peer.url}/api/users?q=${encodeURIComponent(q)}`,
+            );
+            // Add the 'remote' property to each user so we can render them differently
+            data.forEach((user) => {
+                user.remote = true;
             });
-        } else {
-            acc.find((user) => user.id === curr.User.id).names.push({
-                name: curr.name,
-                main: curr.main,
-            });
-        }
-        return acc;
-    }, []);
-    users.forEach((user) => {
-        user.names.sort((a, b) => {
-            if (a.main && !b.main) {
-                return -1;
-            } else if (!a.main && b.main) {
-                return 1;
-            } else {
-                return 0;
+            users.push(...data);
+        } catch (err) {
+            // If it's a 404, it's because the peer is running an older version
+            // and doesn't have the search endpoint. We can ignore it.
+            if (err.response.status !== 404) {
+                console.error(err);
             }
-        });
-    });
+        }
+    }
     res.render('search', { users, q });
 });
 
@@ -841,5 +826,22 @@ api.get(
         return acceptAccessRequest(req, res);
     },
 );
+
+// Public search API
+api.get('/users', async (req, res) => {
+    const { q } = req.query;
+    if (!q) {
+        return res
+            .status(400)
+            .json({ error: 'Please provide a search query.' });
+    }
+    if (q.length < 3) {
+        return res.status(400).json({
+            error: 'Please provide a search query of at least 3 characters.',
+        });
+    }
+    const users = await searchUsers(q);
+    return res.json(users);
+});
 
 export { api, frontend, auth };

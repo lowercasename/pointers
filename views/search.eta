@@ -12,7 +12,8 @@
     <% if (it.users.length > 0) { %>
         <% it.users.forEach((user) => { %>
             <div class="user item">
-                <a href="/u/<%= user.hash %>"><%= user.names[0].name %></a>
+                <a href="<%= user.url %>"><% if (user.remote) {%><%= user.names[0].absolute %><% } else { %><%= user.names[0].name %><% } %></a>
+                <% if (user.remote) {%><aside>This profile is hosted on another Pointers instance, <strong><%= user.host %></strong>. You will need to create an account on that instance to view it.</aside><%}%>
                 <% if (user.bio) { %><p class="description"><%= user.bio %></p><% } %>
             </div>
         <% }) %>

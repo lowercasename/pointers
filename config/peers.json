@@ -1,0 +1,10 @@
+{
+    "peers": [
+        {
+            "url": "https://dev.pointers.website"
+        },
+        {
+            "url": "https://pointers.website"
+        }
+    ]
+}
